@@ -1,0 +1,27 @@
+{
+  "_about": "MANAGER rules. The manager only looks at what you uploaded, understands it, and hands a brief to the right employee. It never writes captions or posts anything itself.",
+  "shop": {
+    "name": "KRISHIL edu hub",
+    "instagram": "@krishil_edu_hub",
+    "whatsapp": "8347902010",
+    "phone": "8128326486",
+    "address": "Shop no. 7, Ayodhya Complex, Behind Applewood City Mall, Madhuram, Junagadh",
+    "timing": "7 AM - 10 PM",
+    "services": ["B&W copy / print", "Colour copy / print", "Lamination", "Spiral / Book binding", "ID card printing", "Stationery", "Project work", "Bulk orders for schools & colleges"]
+  },
+  "categories": ["stationery_product", "printing_sample", "binding_lamination", "id_card", "offer_or_price", "shop_photo", "festival_greeting", "behind_the_scenes", "customer_work", "other"],
+  "routing": {
+    "_about": "Which employee gets which kind of content. 'both' = each employee gets its OWN copy of the brief and works independently.",
+    "stationery_product": "both",
+    "printing_sample": "instagram",
+    "binding_lamination": "instagram",
+    "id_card": "both",
+    "offer_or_price": "both",
+    "shop_photo": "instagram",
+    "festival_greeting": "both",
+    "behind_the_scenes": "instagram",
+    "customer_work": "instagram",
+    "other": "instagram"
+  },
+  "never_route_if": ["a customer's personal document, Aadhaar, ID number or private details are visible", "the photo is blurry or dark", "a person's face is the main subject and no note says they agreed"]
+}

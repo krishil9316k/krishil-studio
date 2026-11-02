@@ -1,0 +1,22 @@
+name: 4 · Instagram token keep-alive
+# Instagram tokens expire after ~60 days. This renews it every week automatically.
+# Needs secret GH_ADMIN_TOKEN (fine-grained token for this repo with "Secrets: Read and write").
+on:
+  schedule:
+    - cron: "23 22 * * 0"   # Monday 3:53 AM IST
+  workflow_dispatch:
+jobs:
+  refresh:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Refresh and store new token
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GH_TOKEN: ${{ secrets.GH_ADMIN_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ] || [ -z "$IG_ACCESS_TOKEN" ]; then echo "Skipping: secrets not set"; exit 0; fi
+          NEW=$(curl -s "https://graph.instagram.com/refresh_access_token?grant_type=ig_refresh_token&access_token=$IG_ACCESS_TOKEN" | jq -r '.access_token // empty')
+          if [ -z "$NEW" ]; then echo "::error::Refresh failed — generate a new token (see README step 4)"; exit 1; fi
+          echo "::add-mask::$NEW"
+          gh secret set IG_ACCESS_TOKEN --repo "$GITHUB_REPOSITORY" --body "$NEW"
+          echo "Token renewed"

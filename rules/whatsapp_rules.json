@@ -1,0 +1,25 @@
+{
+  "_about": "WHATSAPP EMPLOYEE rules. Only the WhatsApp employee reads this file. It PREPARES messages; you send them with one tap (WhatsApp does not allow free automatic group posting, and bots get numbers banned).",
+  "audience": "teachers, professors, college trustees, school staff and bulk-order customers in Junagadh",
+  "language": "Gujarati first, then a short English line",
+  "max_promo_messages_per_day": 1,
+  "daily_update": {
+    "enabled": true,
+    "ready_by_ist": "07:30",
+    "news_items": 3,
+    "news_feeds": [
+      "https://news.google.com/rss/search?q=GSEB+OR+%22Gujarat+board%22+OR+GTU+OR+%22Bhakta+Kavi+Narsinh+Mehta+University%22&hl=en-IN&gl=IN&ceid=IN:en",
+      "https://news.google.com/rss/search?q=Gujarat+education+school+exam&hl=en-IN&gl=IN&ceid=IN:en"
+    ]
+  },
+  "style": "respectful and short (max ~8 lines), like a helpful local shop, not an advertisement blast; one offer at most; end with shop name and WhatsApp 8347902010",
+  "do_not": [
+    "send more than one promotional message per day",
+    "copy news articles — only short summaries in our own words with the link",
+    "invent exam dates, results or circulars; if unsure, leave the item out",
+    "forward chain messages, political or religious content",
+    "share anyone's phone number or personal data",
+    "use automatic group-posting bots (account ban risk)"
+  ],
+  "image_max_side": 1600
+}

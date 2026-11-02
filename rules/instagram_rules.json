@@ -1,0 +1,33 @@
+{
+  "_about": "INSTAGRAM EMPLOYEE rules. Only the Instagram employee reads this file.",
+  "auto_publish": false,
+  "posts_per_day": 3,
+  "time_slots_ist": ["08:30", "13:00", "19:30"],
+  "min_gap_minutes": 120,
+  "caption_language": "English with a short Gujarati line",
+  "caption_max_chars": 2200,
+  "max_hashtags": 5,
+  "brand_hashtags": ["#krishileduhub", "#junagadh"],
+  "image_size": [1080, 1350],
+  "reel_size": [1080, 1920],
+  "reel_max_seconds": 90,
+  "style": "trendy, friendly, student-focused; short hook in line 1; 1-3 emojis; clear call to action to order on WhatsApp 8347902010 or visit the shop",
+  "do_not": [
+    "promise prices that are not in the brief or rate card",
+    "copy captions or song lyrics from others",
+    "mention competitors",
+    "post the same category twice in a row when another is waiting",
+    "use more than 5 hashtags (Instagram limit since Dec 2025)",
+    "show customer documents or personal details"
+  ],
+  "rate_card": {
+    "B&W copy / print": "₹1",
+    "WhatsApp B&W copy": "₹2",
+    "Colour copy / print": "₹5",
+    "A4 lamination": "₹18 (bulk ₹15)",
+    "Aadhaar card lamination": "₹8",
+    "Receipt / half A4 lamination": "₹13",
+    "Spiral / Book binding": "₹25 up to 100 pages, ₹40 for 150+ pages"
+  },
+  "graph_api_version": "v23.0"
+}

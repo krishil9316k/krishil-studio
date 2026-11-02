@@ -1,0 +1,32 @@
+name: 3 · WhatsApp employee
+on:
+  schedule:
+    - cron: "47 * * * *"    # hourly: prepare messages; morning run makes the daily update
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["1 · Manager (route new uploads)"]
+    types: [completed]
+permissions:
+  contents: write
+concurrency:
+  group: repo-writer
+  cancel-in-progress: false
+jobs:
+  whatsapp:
+    runs-on: ubuntu-latest
+    env:   # no Instagram secrets here — this employee can't touch Instagram
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -q -r requirements.txt
+      - name: Prepare messages + daily update
+        run: python workers/whatsapp_worker.py run
+      - name: Save (WhatsApp lane only)
+        run: |
+          git config user.name "krishil-whatsapp"; git config user.email "whatsapp@users.noreply.github.com"
+          git add -A queues/whatsapp media/whatsapp status/whatsapp.json
+          git commit -m "whatsapp: prepare" || exit 0
+          git pull --rebase -X theirs && git push

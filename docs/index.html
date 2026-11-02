@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>KRISHIL Studio</title>
+<meta name="theme-color" content="#0B2A4A">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{--navy:#0B2A4A;--teal:#0E7C7B;--mint:#D9F2EE;--gold:#FFC72C;--ink:#14212B;--muted:#5D6B78;--bg:#F5F7F6;--card:#fff;--line:#E3E8EA;--ig:#C13584;--wa:#1FA855;--red:#C0392B}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--ink:#E8EEF1;--muted:#9FB0BC;--bg:#0C141B;--card:#15212B;--line:#24343F;--mint:#123B3A}}
+*{box-sizing:border-box}body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);padding-bottom:84px}
+header{background:var(--navy);color:#fff;padding:16px 16px 14px;position:sticky;top:0;z-index:5}
+header h1{font-family:"Baloo 2",sans-serif;margin:0;font-size:22px;letter-spacing:.3px}header h1 span{color:var(--gold)}
+header p{margin:2px 0 0;font-size:12px;opacity:.75}
+main{max-width:760px;margin:0 auto;padding:16px}
+nav{position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--line);display:flex;z-index:6;padding-bottom:env(safe-area-inset-bottom)}
+nav button{flex:1;border:0;background:none;padding:10px 4px 12px;font:600 12px Inter;color:var(--muted);cursor:pointer}
+nav button b{display:block;font-size:20px;line-height:1.2}nav button.on{color:var(--teal)}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+h2{font:700 18px "Baloo 2";margin:4px 0 10px}
+label{display:block;font-size:13px;font-weight:600;margin:10px 0 4px}
+input,select,textarea{width:100%;padding:10px;border:1px solid var(--line);border-radius:10px;font:15px Inter;background:var(--bg);color:var(--ink)}
+textarea{min-height:120px;resize:vertical}
+.btn{border:0;border-radius:10px;padding:11px 14px;font:600 14px Inter;cursor:pointer;background:var(--teal);color:#fff}
+.btn.ghost{background:transparent;color:var(--teal);border:1px solid var(--teal)}.btn.gold{background:var(--gold);color:var(--navy)}
+.btn.ig{background:var(--ig)}.btn.wa{background:var(--wa)}.btn.red{background:transparent;color:var(--red);border:1px solid var(--red)}
+.row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}.row .btn{flex:1 1 auto}
+.drop{border:2px dashed var(--teal);border-radius:14px;padding:26px 14px;text-align:center;background:var(--mint);cursor:pointer}
+.drop b{font-family:"Baloo 2";font-size:18px;color:var(--teal)}
+.thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(80px,1fr));gap:6px;margin-top:10px}
+.thumbs div{aspect-ratio:1;border-radius:8px;background:#ccc center/cover;font-size:10px;display:flex;align-items:end;padding:3px;color:#fff;text-shadow:0 1px 2px #000;overflow:hidden}
+.post{display:grid;grid-template-columns:110px 1fr;gap:12px}
+.post img,.post video{width:110px;aspect-ratio:4/5;object-fit:cover;border-radius:10px;background:#ddd}
+.chip{display:inline-block;font:600 11px Inter;padding:3px 8px;border-radius:99px;background:var(--mint);color:var(--teal);margin-right:4px}
+.chip.draft{background:#FFF3CD;color:#8A6200}.chip.published,.chip.sent{background:#E1F5E8;color:#1E7B3F}.chip.failed{background:#FBE3E0;color:var(--red)}
+.muted{color:var(--muted);font-size:13px}.small{font-size:12px}
+.filters{display:flex;gap:6px;overflow-x:auto;margin-bottom:10px}.filters button{white-space:nowrap}
+.toast{position:fixed;left:50%;bottom:96px;transform:translateX(-50%);background:var(--navy);color:#fff;padding:10px 16px;border-radius:10px;font-size:14px;opacity:0;transition:.3s;pointer-events:none;z-index:9;max-width:90vw}
+.toast.on{opacity:1}
+.lane{border-left:4px solid var(--teal);padding-left:10px}.lane.ig{border-color:var(--ig)}.lane.wa{border-color:var(--wa)}
+.msg{white-space:pre-wrap;font-size:14px;background:var(--bg);border-radius:10px;padding:10px;margin-top:8px}
+.switch{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:10px 0}.switch input{width:auto;transform:scale(1.4)}
+@media (max-width:420px){.post{grid-template-columns:86px 1fr}.post img,.post video{width:86px}}
+</style>
+</head>
+<body>
+<header><h1>KRISHIL <span>Studio</span></h1><p id="sub">Manager · Instagram employee · WhatsApp employee</p></header>
+<main id="app"></main>
+<nav id="nav">
+  <button data-t="upload" class="on"><b>📤</b>Upload</button>
+  <button data-t="instagram"><b>📸</b>Instagram</button>
+  <button data-t="whatsapp"><b>💬</b>WhatsApp</button>
+  <button data-t="settings"><b>⚙️</b>Settings</button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+const $=s=>document.querySelector(s), app=$("#app");
+const store={get(k,d){try{return JSON.parse(localStorage.getItem("ks_"+k))??d}catch{return d}},set(k,v){try{localStorage.setItem("ks_"+k,JSON.stringify(v))}catch{}}};
+let cfg=store.get("cfg",{owner:"",repo:"krishil-studio",branch:"main",token:""});
+const toast=(m,ms=2600)=>{const t=$("#toast");t.textContent=m;t.classList.add("on");clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove("on"),ms)};
+const esc=s=>String(s??"").replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const ready=()=>cfg.owner&&cfg.repo&&cfg.token;
+
+/* ---------- GitHub API ---------- */
+async function gh(path,opt={}){
+  const r=await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/${path}`,{...opt,headers:{Authorization:`Bearer ${cfg.token}`,Accept:"application/vnd.github+json",...(opt.headers||{})}});
+  if(r.status===404&&(!opt.method||opt.method==="GET"))return null;
+  if(!r.ok)throw new Error(`${r.status} ${(await r.text()).slice(0,160)}`);
+  return r.status===204?{}:r.json();
+}
+const b64d=s=>new TextDecoder().decode(Uint8Array.from(atob(s.replace(/\n/g,"")),c=>c.charCodeAt(0)));
+const b64e=str=>{const b=new TextEncoder().encode(str);let s="";b.forEach(x=>s+=String.fromCharCode(x));return btoa(s)};
+async function readJSON(p){const f=await gh(`contents/${p}?ref=${cfg.branch}&t=${Date.now()}`);return f?{data:JSON.parse(b64d(f.content)),sha:f.sha}:null}
+async function writeJSON(p,data,sha,msg){return gh(`contents/${p}`,{method:"PUT",body:JSON.stringify({message:msg||`app: update ${p}`,content:b64e(JSON.stringify(data,null,2)),sha,branch:cfg.branch})})}
+async function listDir(p){const l=await gh(`contents/${p}?ref=${cfg.branch}&t=${Date.now()}`);return (l||[]).filter(x=>x.type==="file"&&x.name.endsWith(".json"))}
+const raw=p=>`https://raw.githubusercontent.com/${cfg.owner}/${cfg.repo}/${cfg.branch}/${p}?t=${Math.floor(Date.now()/60000)}`;
+const runFlow=f=>gh(`actions/workflows/${f}/dispatches`,{method:"POST",body:JSON.stringify({ref:cfg.branch})});
+function istNow(){const d=new Date(Date.now()+330*60000);return d.toISOString().slice(0,16)+"+05:30"}
+const fmtSlot=s=>s?new Date(s).toLocaleString("en-IN",{weekday:"short",day:"numeric",month:"short",hour:"numeric",minute:"2-digit",timeZone:"Asia/Kolkata"}):"not scheduled";
+
+/* ---------- tabs ---------- */
+const tabs={upload,instagram,whatsapp,settings};
+document.querySelectorAll("#nav button").forEach(b=>b.onclick=()=>show(b.dataset.t));
+function show(t){document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t===t));if(!ready()&&t!=="settings"){settings(true);return}tabs[t]()}
+
+/* ---------- UPLOAD (to the Manager) ---------- */
+let picked=[];
+function upload(){
+  app.innerHTML=`<div class="card"><h2>Give work to the Manager</h2>
+  <div class="drop" id="drop"><b>Tap to add photos / videos</b><div class="muted small">The Manager looks at each one and assigns it to the Instagram and/or WhatsApp employee.</div></div>
+  <input type="file" id="file" accept="image/*,video/*" multiple hidden>
+  <div class="thumbs" id="thumbs"></div>
+  <label>Note for the Manager (optional)</label>
+  <textarea id="note" style="min-height:70px" placeholder="e.g. New Unicorn gel pens, ₹10 each. Diwali offer on binding."></textarea>
+  <label>Send to</label>
+  <select id="to"><option value="auto">Let the Manager decide</option><option value="instagram">Instagram only</option><option value="whatsapp">WhatsApp only</option><option value="both">Both (separately)</option></select>
+  <div class="row"><button class="btn gold" id="go">Hand over to Manager</button></div>
+  <p class="muted small" id="prog"></p></div>
+  <div class="card" id="mgr"><span class="muted small">Loading manager status…</span></div>`;
+  $("#drop").onclick=()=>$("#file").click();
+  $("#file").onchange=e=>{picked=[...e.target.files];$("#thumbs").innerHTML=picked.map(f=>`<div style="background-image:url(${f.type.startsWith("image")?URL.createObjectURL(f):""})">${f.type.startsWith("video")?"🎬 ":""}${esc(f.name.slice(0,14))}</div>`).join("")};
+  $("#go").onclick=sendAll;
+  managerStatus();
+}
+async function managerStatus(){
+  try{const s=(await readJSON("status/manager.json"))?.data||{};
+    const held=(s.held||[]).map(h=>`<li>${esc(h.id)} — ${esc(h.reason)}</li>`).join("");
+    $("#mgr").innerHTML=`<h2>Manager</h2><p class="muted small">Last check: ${esc(s.last_run||"not run yet")}</p>
+    ${(s.routed||[]).map(r=>`<span class="chip">${esc(r.category)} → ${r.to.join(" + ")}</span>`).join(" ")||'<span class="muted small">Nothing routed in the last run.</span>'}
+    ${held?`<p class="small"><b>Held back (not posted):</b></p><ul class="small">${held}</ul>`:""}`}catch(e){$("#mgr").innerHTML=`<span class="muted small">${esc(e.message)}</span>`}
+}
+const fileB64=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(",")[1]);r.onerror=no;r.readAsDataURL(f)});
+async function sendAll(){
+  if(!picked.length)return toast("Add a photo or video first");
+  const note=$("#note").value.trim(),to=$("#to").value;$("#go").disabled=true;
+  let n=0;
+  for(const f of picked){
+    if(f.size>45e6){toast(`${f.name} is over 45 MB — trim it first`);continue}
+    const id=new Date(Date.now()+330*60000).toISOString().replace(/\D/g,"").slice(0,14)+String(n);
+    const name=`${id}__${f.name.replace(/[^\w.\-]/g,"_")}`;
+    $("#prog").textContent=`Uploading ${++n}/${picked.length}: ${f.name}…`;
+    try{
+      await gh(`contents/inbox/${name}.json`,{method:"PUT",body:JSON.stringify({message:`upload note ${name}`,content:b64e(JSON.stringify({note,send_to:to})),branch:cfg.branch})});
+      await gh(`contents/inbox/${name}`,{method:"PUT",body:JSON.stringify({message:`upload ${name}`,content:await fileB64(f),branch:cfg.branch})});
+    }catch(e){toast("Upload failed: "+e.message,5000);$("#go").disabled=false;return}
+  }
+  $("#prog").textContent="✅ Handed over. The Manager starts in about a minute; drafts appear in each tab a few minutes later.";
+  picked=[];$("#thumbs").innerHTML="";$("#note").value="";$("#go").disabled=false;
+}
+
+/* ---------- INSTAGRAM EMPLOYEE ---------- */
+let igFilter="draft";
+async function instagram(){
+  app.innerHTML=`<div class="lane ig"><h2>📸 Instagram employee</h2></div>
+  <div class="filters">${["draft","scheduled","published","failed","skipped"].map(f=>`<button class="btn ${f===igFilter?"ig":"ghost"}" data-f="${f}">${f}</button>`).join("")}
+  <button class="btn ghost" id="igrun">▶ Run now</button></div><div id="iglist" class="muted">Loading…</div><div id="igstat"></div>`;
+  app.querySelectorAll("[data-f]").forEach(b=>b.onclick=()=>{igFilter=b.dataset.f;instagram()});
+  $("#igrun").onclick=async()=>{try{await runFlow("instagram.yml");toast("Instagram employee started — refresh in 2–3 min")}catch(e){toast(e.message,5000)}};
+  try{
+    const files=await listDir("queues/instagram/tasks");
+    const tasks=(await Promise.all(files.map(f=>readJSON(f.path).then(r=>({...r,path:f.path}))))).filter(t=>t.data.status===igFilter)
+      .sort((a,b)=>(a.data.slot||a.data.created).localeCompare(b.data.slot||b.data.created));
+    $("#iglist").innerHTML=tasks.length?"":`<div class="card muted">No ${igFilter} posts.</div>`;
+    tasks.forEach(t=>$("#iglist").append(igCard(t)));
+    const s=(await readJSON("status/instagram.json"))?.data||{};
+    $("#igstat").innerHTML=`<p class="muted small">Last run: ${esc(s.last_run||"—")} ${(s.errors||[]).map(e=>`<br>⚠️ ${esc(e)}`).join("")}</p>`;
+  }catch(e){$("#iglist").textContent=e.message}
+}
+function igCard(t){
+  const d=t.data,el=document.createElement("div");el.className="card";
+  const media=d.media?.endsWith(".mp4")?`<video src="${raw(d.media)}" muted playsinline controls></video>`:`<img src="${raw(d.media)}" alt="">`;
+  el.innerHTML=`<div class="post">${media}<div><span class="chip ${d.status}">${d.status}</span><span class="chip">${esc(d.category)}</span>
+  <p class="small muted">${d.status==="published"?"Posted "+esc(fmtSlot(d.published)):"🕒 "+esc(fmtSlot(d.slot))}</p>
+  ${d.last_error?`<p class="small" style="color:var(--red)">${esc(d.last_error)}</p>`:""}</div></div>
+  <label>Caption</label><textarea class="cap">${esc(d.caption)}</textarea>
+  <label>Hashtags (max 5)</label><input class="tags" value="${esc((d.hashtags||[]).join(" "))}">
+  <div class="row">${d.status==="published"?"":`
+    ${d.status!=="scheduled"?`<button class="btn ig" data-a="approve">✅ Approve</button>`:""}
+    <button class="btn ghost" data-a="save">Save edits</button>
+    <button class="btn gold" data-a="now">Post next run</button>
+    <button class="btn red" data-a="skip">Skip</button>`}</div>`;
+  el.onclick=async e=>{const a=e.target.dataset.a;if(!a)return;
+    const tags=el.querySelector(".tags").value.split(/[\s,]+/).filter(Boolean).slice(0,5);
+    if(el.querySelector(".tags").value.split(/[\s,]+/).filter(Boolean).length>5)toast("Instagram allows max 5 hashtags — extra removed");
+    const nd={...d,caption:el.querySelector(".cap").value,hashtags:tags};
+    if(a==="approve"){nd.status="approved";nd.slot=null;nd.attempts=0}
+    if(a==="now"){nd.status="scheduled";nd.slot=istNow();nd.attempts=0}
+    if(a==="skip")nd.status="skipped";
+    try{await writeJSON(t.path,nd,t.sha,`app: ${a} ${d.id}`);toast(a==="approve"?"Approved — it gets the next free time slot":a==="now"?"Will post on the next run (≤30 min)":"Saved");instagram()}catch(err){toast(err.message,5000)}};
+  return el;
+}
+
+/* ---------- WHATSAPP EMPLOYEE ---------- */
+async function whatsapp(){
+  app.innerHTML=`<div class="lane wa"><h2>💬 WhatsApp employee</h2><p class="muted small">Ready-made messages. Tap <b>Share</b>, then pick your Channel, group or broadcast list.</p></div>
+  <div class="filters"><button class="btn ghost" id="warun">▶ Run now</button></div><div id="walist" class="muted">Loading…</div>`;
+  $("#warun").onclick=async()=>{try{await runFlow("whatsapp.yml");toast("WhatsApp employee started — refresh in 2–3 min")}catch(e){toast(e.message,5000)}};
+  try{
+    const files=await listDir("queues/whatsapp/ready"),today=istNow().slice(0,10);
+    const items=(await Promise.all(files.map(f=>readJSON(f.path).then(r=>({...r,path:f.path}))))).filter(t=>t.data.status==="ready")
+      .sort((a,b)=>a.data.send_on.localeCompare(b.data.send_on));
+    $("#walist").innerHTML=items.length?"":`<div class="card muted">Nothing waiting. 🎉</div>`;
+    items.forEach(t=>$("#walist").append(waCard(t,today)));
+  }catch(e){$("#walist").textContent=e.message}
+}
+function waCard(t,today){
+  const d=t.data,el=document.createElement("div");el.className="card";
+  const when=d.send_on<=today?`<span class="chip sent">send today</span>`:`<span class="chip">for ${esc(d.send_on)}</span>`;
+  el.innerHTML=`${when}<span class="chip">${d.type==="daily"?"🌅 daily update":esc(d.category)}</span>
+  ${d.media?(d.media.endsWith(".mp4")?`<video src="${raw(d.media)}" controls playsinline style="width:100%;border-radius:10px;margin-top:8px"></video>`:`<img src="${raw(d.media)}" style="width:100%;border-radius:10px;margin-top:8px" alt="">`):""}
+  <textarea class="m" style="margin-top:8px">${esc(d.message)}</textarea>
+  <div class="row"><button class="btn wa" data-a="share">📲 Share to WhatsApp</button><button class="btn ghost" data-a="copy">Copy text</button><button class="btn ghost" data-a="sent">✔ Mark sent</button><button class="btn red" data-a="skip">Skip</button></div>`;
+  el.onclick=async e=>{const a=e.target.dataset.a;if(!a)return;const text=el.querySelector(".m").value;
+    if(a==="copy"){await navigator.clipboard.writeText(text).catch(()=>{});return toast("Copied")}
+    if(a==="share"){
+      try{
+        if(d.media&&navigator.canShare){const blob=await (await fetch(raw(d.media))).blob();const file=new File([blob],d.media.split("/").pop(),{type:blob.type});
+          if(navigator.canShare({files:[file]})){await navigator.clipboard.writeText(text).catch(()=>{});await navigator.share({files:[file],text});toast("If the text didn't attach, paste it — it's copied");return}}
+        window.open("https://wa.me/?text="+encodeURIComponent(text),"_blank");
+        if(d.media)toast("Text opened in WhatsApp — attach the photo from the card (long-press → save)",5000);
+      }catch(err){if(err.name!=="AbortError")toast(err.message)}
+      return}
+    const nd={...d,message:text,status:a==="sent"?"sent":"skipped",[a==="sent"?"sent_at":"skipped_at"]:istNow()};
+    try{await writeJSON(t.path,nd,t.sha,`app: ${a} ${d.id}`);toast(a==="sent"?"Marked as sent":"Skipped");whatsapp()}catch(err){toast(err.message,5000)}};
+  return el;
+}
+
+/* ---------- SETTINGS ---------- */
+async function settings(first){
+  document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("on",b.dataset.t==="settings"));
+  app.innerHTML=`<div class="card"><h2>Connect your GitHub repo</h2>
+  ${first?'<p class="small">First time? Fill these in once. They stay only on this phone/computer.</p>':""}
+  <label>GitHub username</label><input id="o" value="${esc(cfg.owner)}" autocapitalize="off">
+  <label>Repository name</label><input id="r" value="${esc(cfg.repo)}" autocapitalize="off">
+  <label>Branch</label><input id="b" value="${esc(cfg.branch)}">
+  <label>Access token (fine-grained, this repo only)</label><input id="k" type="password" value="${esc(cfg.token)}" placeholder="github_pat_…">
+  <div class="row"><button class="btn" id="sv">Save & test</button></div></div>
+  <div id="rulesBox"></div>`;
+  $("#sv").onclick=async()=>{cfg={owner:$("#o").value.trim(),repo:$("#r").value.trim(),branch:$("#b").value.trim()||"main",token:$("#k").value.trim()};store.set("cfg",cfg);
+    try{await gh("");toast("Connected ✅");rulesBox()}catch(e){toast("Could not connect: "+e.message,5000)}};
+  if(ready())rulesBox();
+}
+async function rulesBox(){
+  const box=$("#rulesBox");box.innerHTML='<div class="card muted">Loading rules…</div>';
+  try{
+    const ig=await readJSON("rules/instagram_rules.json"),wa=await readJSON("rules/whatsapp_rules.json");
+    box.innerHTML=`<div class="card lane ig"><h2>📸 Instagram rules</h2>
+      <div class="switch"><span>Post automatically (no approval)</span><input type="checkbox" id="auto" ${ig.data.auto_publish?"checked":""}></div>
+      <label>Posts per day (1–5)</label><input id="ppd" type="number" min="1" max="5" value="${ig.data.posts_per_day}">
+      <label>Time slots (IST, comma separated)</label><input id="slots" value="${esc(ig.data.time_slots_ist.join(", "))}">
+      <div class="row"><button class="btn ig" id="saveig">Save Instagram rules</button></div></div>
+      <div class="card lane wa"><h2>💬 WhatsApp rules</h2>
+      <div class="switch"><span>Morning education-news update</span><input type="checkbox" id="daily" ${wa.data.daily_update.enabled?"checked":""}></div>
+      <label>Ready by (IST)</label><input id="rb" value="${esc(wa.data.daily_update.ready_by_ist)}">
+      <label>Max promo messages per day</label><input id="mp" type="number" min="1" max="3" value="${wa.data.max_promo_messages_per_day}">
+      <div class="row"><button class="btn wa" id="savewa">Save WhatsApp rules</button></div></div>`;
+    $("#saveig").onclick=async()=>{const d={...ig.data,auto_publish:$("#auto").checked,posts_per_day:Math.min(5,Math.max(1,+$("#ppd").value||3)),
+      time_slots_ist:$("#slots").value.split(/[,\s]+/).filter(s=>/^\d{1,2}:\d{2}$/.test(s)).map(s=>s.padStart(5,"0"))};
+      if(d.time_slots_ist.length<d.posts_per_day)return toast(`Add at least ${d.posts_per_day} time slots`);
+      try{await writeJSON("rules/instagram_rules.json",d,ig.sha,"app: instagram rules");toast("Instagram rules saved");rulesBox()}catch(e){toast(e.message,5000)}};
+    $("#savewa").onclick=async()=>{const d={...wa.data,max_promo_messages_per_day:Math.min(3,Math.max(1,+$("#mp").value||1)),daily_update:{...wa.data.daily_update,enabled:$("#daily").checked,ready_by_ist:$("#rb").value.trim()||"07:30"}};
+      try{await writeJSON("rules/whatsapp_rules.json",d,wa.sha,"app: whatsapp rules");toast("WhatsApp rules saved");rulesBox()}catch(e){toast(e.message,5000)}};
+  }catch(e){box.innerHTML=`<div class="card muted">${esc(e.message)}</div>`}
+}
+
+show(ready()?"upload":"settings");
+</script>
+</body>
+</html>

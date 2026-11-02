@@ -1,0 +1,41 @@
+name: 2 · Instagram employee
+on:
+  schedule:
+    - cron: "*/30 * * * *"  # every 30 min: prepare drafts, post what's due
+  workflow_dispatch:
+  workflow_run:
+    workflows: ["1 · Manager (route new uploads)"]
+    types: [completed]
+permissions:
+  contents: write
+concurrency:
+  group: repo-writer
+  cancel-in-progress: false
+jobs:
+  instagram:
+    runs-on: ubuntu-latest
+    env:   # ONLY the Instagram employee ever sees the Instagram token
+      GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+      GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
+      IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+      IG_USER_ID: ${{ secrets.IG_USER_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -q -r requirements.txt
+      - name: Prepare captions + edits, schedule
+        run: python workers/instagram_worker.py prepare
+      - name: Save drafts first (Instagram needs the photo online before posting)
+        run: |
+          git config user.name "krishil-instagram"; git config user.email "instagram@users.noreply.github.com"
+          git add -A queues/instagram media/instagram status/instagram.json
+          git commit -m "instagram: prepare" || true
+          git pull --rebase -X theirs && git push
+      - name: Publish due posts
+        run: python workers/instagram_worker.py publish
+      - name: Save results (Instagram lane only)
+        run: |
+          git add -A queues/instagram media/instagram status/instagram.json
+          git commit -m "instagram: publish" || exit 0
+          git pull --rebase -X theirs && git push

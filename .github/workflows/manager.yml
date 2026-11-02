@@ -1,0 +1,31 @@
+name: 1 · Manager (route new uploads)
+on:
+  push:
+    paths: ["inbox/**"]
+  schedule:
+    - cron: "11 * * * *"   # hourly backup check
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: repo-writer        # all three take turns, so their commits never clash
+  cancel-in-progress: false
+jobs:
+  route:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12" }
+      - run: pip install -q -r requirements.txt
+      - name: Manager assigns tasks
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: ${{ vars.GEMINI_MODEL || 'gemini-2.5-flash' }}
+        run: python manager/manager.py
+      - name: Save (manager lane only)
+        run: |
+          git config user.name "krishil-manager"; git config user.email "manager@users.noreply.github.com"
+          git add -A inbox media/originals queues/instagram/new queues/whatsapp/new status/manager.json
+          git commit -m "manager: route uploads" || exit 0
+          git pull --rebase -X theirs && git push
