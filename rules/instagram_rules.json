@@ -2,14 +2,27 @@
   "_about": "INSTAGRAM EMPLOYEE rules. Only the Instagram employee reads this file.",
   "auto_publish": false,
   "posts_per_day": 3,
-  "time_slots_ist": ["08:30", "13:00", "19:30"],
+  "time_slots_ist": [
+    "08:30",
+    "13:00",
+    "19:30"
+  ],
   "min_gap_minutes": 120,
   "caption_language": "English with a short Gujarati line",
   "caption_max_chars": 2200,
   "max_hashtags": 5,
-  "brand_hashtags": ["#krishileduhub", "#junagadh"],
-  "image_size": [1080, 1350],
-  "reel_size": [1080, 1920],
+  "brand_hashtags": [
+    "#krishileduhub",
+    "#junagadh"
+  ],
+  "image_size": [
+    1080,
+    1350
+  ],
+  "reel_size": [
+    1080,
+    1920
+  ],
   "reel_max_seconds": 90,
   "style": "trendy, friendly, student-focused; short hook in line 1; 1-3 emojis; clear call to action to order on WhatsApp 8347902010 or visit the shop",
   "do_not": [
