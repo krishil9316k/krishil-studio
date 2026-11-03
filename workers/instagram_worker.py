@@ -153,10 +153,15 @@ def schedule(rules):
 # ----------------------------------------------------------------- publish
 class IG:
     def __init__(self, ver):
-        self.token = os.environ["IG_ACCESS_TOKEN"]
-        self.uid = os.environ["IG_USER_ID"]
-        self.base = f"https://graph.instagram.com/{ver}"
+        self.token = os.environ["IG_ACCESS_TOKEN"].strip()
+        self.uid = os.environ["IG_USER_ID"].strip()
         self.ver = ver
+        # Instagram-login tokens start with "IG" -> graph.instagram.com
+        # Facebook / Unified-login / business tokens start with "EAA" -> graph.facebook.com
+        host = os.environ.get("IG_API_HOST", "").strip() or (
+            "graph.instagram.com" if self.token.startswith("IG") else "graph.facebook.com")
+        self.base = f"https://{host}/{ver}"
+        print("Instagram API host:", host)
 
     def _post(self, path, data):
         r = requests.post(f"{self.base}/{path}", data=dict(data, access_token=self.token), timeout=120)
