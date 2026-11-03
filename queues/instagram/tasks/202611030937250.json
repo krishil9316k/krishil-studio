@@ -21,8 +21,8 @@
     "#JunagadhStationery",
     "#CuteStationery"
   ],
-  "status": "approved",
-  "slot": null,
+  "status": "scheduled",
+  "slot": "2026-11-04T19:30+05:30",
   "attempts": 0,
   "ai_note": "",
   "prepared": "2026-11-03T10:08+05:30"
