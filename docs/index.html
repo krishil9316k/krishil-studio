@@ -107,9 +107,13 @@ function upload(){
 async function managerStatus(){
   try{const s=(await readJSON("status/manager.json"))?.data||{};
     const held=(s.held||[]).map(h=>`<li>${esc(h.id)} — ${esc(h.reason)}</li>`).join("");
-    $("#mgr").innerHTML=`<h2>Manager</h2><p class="muted small">Last check: ${esc(s.last_run||"not run yet")}</p>
+    const inbox=(await gh(`contents/inbox?ref=${cfg.branch}&t=${Date.now()}`)||[]).filter(x=>x.type==="file"&&!x.name.startsWith(".")&&!x.name.endsWith(".json")).length;
+    $("#mgr").innerHTML=`<h2>Manager</h2><p class="muted small">Last check: ${esc(s.last_run||"not run yet")} · AI: ${esc(s.ai||"—")}<br>Waiting in inbox: <b>${inbox}</b></p>
+    ${(s.errors||[]).map(e=>`<p class="small" style="color:var(--red)">⚠️ ${esc(e)}</p>`).join("")}
+    <div class="row"><button class="btn ghost" id="mrun">▶ Run Manager now</button></div>
     ${(s.routed||[]).map(r=>`<span class="chip">${esc(r.category)} → ${r.to.join(" + ")}</span>`).join(" ")||'<span class="muted small">Nothing routed in the last run.</span>'}
-    ${held?`<p class="small"><b>Held back (not posted):</b></p><ul class="small">${held}</ul>`:""}`}catch(e){$("#mgr").innerHTML=`<span class="muted small">${esc(e.message)}</span>`}
+    ${held?`<p class="small"><b>Held back (not posted):</b></p><ul class="small">${held}</ul>`:""}`;
+    $("#mrun").onclick=async()=>{try{await runFlow("manager.yml");toast("Manager started — check back in 2–3 min")}catch(err){toast(err.message,5000)}}}catch(e){$("#mgr").innerHTML=`<span class="muted small">${esc(e.message)}</span>`}
 }
 const fileB64=f=>new Promise((ok,no)=>{const r=new FileReader();r.onload=()=>ok(r.result.split(",")[1]);r.onerror=no;r.readAsDataURL(f)});
 async function sendAll(){
@@ -153,7 +157,8 @@ function igCard(t){
   const media=d.media?.endsWith(".mp4")?`<video src="${raw(d.media)}" muted playsinline controls></video>`:`<img src="${raw(d.media)}" alt="">`;
   el.innerHTML=`<div class="post">${media}<div><span class="chip ${d.status}">${d.status}</span><span class="chip">${esc(d.category)}</span>
   <p class="small muted">${d.status==="published"?"Posted "+esc(fmtSlot(d.published)):"🕒 "+esc(fmtSlot(d.slot))}</p>
-  ${d.last_error?`<p class="small" style="color:var(--red)">${esc(d.last_error)}</p>`:""}</div></div>
+  ${d.last_error?`<p class="small" style="color:var(--red)">${esc(d.last_error)}</p>`:""}
+  ${d.ai_note?`<p class="small muted">ℹ️ Simple caption used (AI was busy). Edit it before approving.</p>`:""}</div></div>
   <label>Caption</label><textarea class="cap">${esc(d.caption)}</textarea>
   <label>Hashtags (max 5)</label><input class="tags" value="${esc((d.hashtags||[]).join(" "))}">
   <div class="row">${d.status==="published"?"":`

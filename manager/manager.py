@@ -36,7 +36,12 @@ Decide:
 - safe: false if any of these is true: {rules['never_route_if']}
 - reason: why, if not safe or not quality_ok
 Return JSON with exactly these keys."""
-    out = ai.ask_json(prompt, preview)
+    try:
+        out = ai.ask_json(prompt, preview)
+    except Exception as e:
+        print("AI failed, routing with your note only:", e)
+        return {"category": "other", "description": note or "New photo from the shop", "safe": True,
+                "reason": "", "key_points": [note] if note else [], "quality_ok": True, "ai_error": str(e)[:300]}
     if out.get("category") not in cats:
         out["category"] = "other"
     return out
@@ -44,7 +49,8 @@ Return JSON with exactly these keys."""
 
 def main():
     rules = lane.rules()
-    status = {"last_run": datetime.now(IST).isoformat(timespec="minutes"), "routed": [], "held": []}
+    status = {"last_run": datetime.now(IST).isoformat(timespec="minutes"), "routed": [], "held": [], "errors": [],
+              "ai": "connected" if ai.available() else "GEMINI_API_KEY missing — using simple captions"}
     for f in lane.list("inbox"):
         if f.suffix == ".json" or kind_of(f) == "other":
             continue
@@ -55,12 +61,15 @@ def main():
         kind = kind_of(f)
         task_id = f.stem.split("__")[0] if "__" in f.stem else datetime.now(IST).strftime("%Y%m%d%H%M%S")
 
-        preview = video_frame(f) if kind == "video" else to_jpeg(open_image(f.read_bytes()), max_side=1280)
         try:
-            info = analyse(rules, preview, note)
-        except Exception as e:  # AI down/limit: try again next run, keep file in inbox
-            print("AI error, will retry later:", e)
+            preview = video_frame(f) if kind == "video" else to_jpeg(open_image(f.read_bytes()), max_side=1280)
+        except Exception as e:
+            status["errors"].append(f"{f.name}: could not open this file ({e})")
+            print("cannot open", f.name, e)
             continue
+        info = analyse(rules, preview, note)
+        if info.get("ai_error"):
+            status["errors"].append(f"{task_id}: AI not working, used your note instead — {info['ai_error'][:200]}")
 
         original = f"media/originals/{f.name}"
         lane.move(f, original)

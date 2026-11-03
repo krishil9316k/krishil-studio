@@ -40,10 +40,16 @@ def clean_hashtags(tags, rules):
     return out[: rules["max_hashtags"]]
 
 
+def simple_caption(rules, brief) -> dict:
+    head = brief.get("note") or brief.get("description") or "Fresh at KRISHIL edu hub!"
+    body = (f"✨ {head}\n\nCopies • Prints • Stationery • Binding • ID cards\n"
+            f"📍 KRISHIL edu hub, Madhuram, Junagadh\n📲 Order on WhatsApp: 8347902010")
+    return {"caption": body, "hashtags": clean_hashtags(["#stationery", "#xerox", "#printing"], rules)}
+
+
 def write_caption(rules, brief, preview: bytes) -> dict:
     if not ai.available():
-        body = f"✨ {brief['description']}\n\n📍 KRISHIL edu hub, Madhuram, Junagadh\n📲 Order on WhatsApp: 8347902010"
-        return {"caption": body, "hashtags": clean_hashtags([], rules)}
+        return simple_caption(rules, brief)
     prompt = f"""You are the INSTAGRAM social media employee of KRISHIL edu hub (xerox, printing, stationery shop, Junagadh).
 Write ONE Instagram caption for this {brief['kind']}.
 What it shows: {brief['description']}
@@ -53,7 +59,12 @@ Language: {rules['caption_language']}. Style: {rules['style']}.
 Rate card (only use these prices, only if relevant): {rules['rate_card']}
 Never: {rules['do_not']}
 Return JSON: {{"caption": "caption text WITHOUT hashtags, under 600 characters", "hashtags": ["up to 3 relevant local/niche tags"], "hook": "first line"}}"""
-    out = ai.ask_json(prompt, preview)
+    try:
+        out = ai.ask_json(prompt, preview)
+    except Exception as e:
+        print("AI caption failed, using simple caption:", e)
+        out = simple_caption(rules, brief)
+        out["ai_error"] = str(e)[:300]
     out["hashtags"] = clean_hashtags(out.get("hashtags"), rules)
     return out
 
@@ -93,6 +104,7 @@ def prepare(rules):
             continue
         task = dict(brief, media=media_rel, caption=cap.get("caption", ""), hashtags=cap.get("hashtags", []),
                     status="approved" if rules.get("auto_publish") else "draft", slot=None, attempts=0,
+                    ai_note=cap.get("ai_error", ""),
                     prepared=now().isoformat(timespec="minutes"))
         lane.write_json(f"{TASKS}/{tid}.json", task)
         lane.check_write(f).unlink()

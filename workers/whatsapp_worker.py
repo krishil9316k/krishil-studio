@@ -47,9 +47,14 @@ def next_promo_day(rules) -> str:
     return d.isoformat()
 
 
+def simple_message(brief) -> str:
+    head = brief.get("note") or brief.get("description") or "નવું સ્ટોક આવી ગયું છે!"
+    return f"🙏 નમસ્તે!\n*{head}*\n\nCopies • Prints • Stationery • Binding • ID cards\n\n{SIGN}"
+
+
 def write_message(rules, brief, preview) -> str:
     if not ai.available():
-        return f"🙏 નમસ્તે!\n{brief['description']}\n\n{brief['note']}\n\n{SIGN}".replace("\n\n\n", "\n\n")
+        return simple_message(brief)
     prompt = f"""You are the WHATSAPP employee of KRISHIL edu hub (xerox, printing, stationery shop in Junagadh).
 Write ONE WhatsApp message for our customers: {rules['audience']}.
 It goes with this {brief['kind']}. What it shows: {brief['description']}. Points: {brief['key_points']}.
@@ -59,7 +64,11 @@ Never: {rules['do_not']}
 Use WhatsApp formatting (*bold* for the key line). End exactly with:
 {SIGN}
 Return JSON: {{"message": "..."}}"""
-    return ai.ask_json(prompt, preview)["message"]
+    try:
+        return ai.ask_json(prompt, preview)["message"]
+    except Exception as e:
+        print("AI message failed, using simple message:", e)
+        return simple_message(brief)
 
 
 def prepare(rules):
@@ -139,8 +148,9 @@ Return JSON: {{"message": "..."}}"""
         try:
             msg = ai.ask_json(prompt)["message"]
         except Exception as e:
-            print("AI error", e)
-            return
+            print("AI error, using plain headlines:", e)
+            lines = [f"• {n['title']}\n{n['link']}" for n in news[: cfg["news_items"]]]
+            msg = f"🌅 *સુપ્રભાત* — આજનું શિક્ષણ અપડેટ ({today})\n\n" + "\n\n".join(lines) + f"\n\n{SIGN}"
     elif news:
         lines = [f"• {n['title']}\n{n['link']}" for n in news[: cfg["news_items"]]]
         msg = f"🌅 *સુપ્રભાત* — આજનું શિક્ષણ અપડેટ ({today})\n\n" + "\n\n".join(lines) + f"\n\n{SIGN}"
