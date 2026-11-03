@@ -20,9 +20,11 @@
     "#junagadh",
     "#FidgetSpinner"
   ],
-  "status": "scheduled",
+  "status": "published",
   "slot": "2026-11-03T19:00+05:30",
   "attempts": 0,
   "ai_note": "",
-  "prepared": "2026-11-03T10:08+05:30"
+  "prepared": "2026-11-03T10:08+05:30",
+  "ig_media_id": "18019523072952894",
+  "published": "2026-11-03T19:01+05:30"
 }
