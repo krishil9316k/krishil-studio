@@ -21,9 +21,11 @@
     "#JunagadhStationery",
     "#CuteStationery"
   ],
-  "status": "scheduled",
+  "status": "published",
   "slot": "2026-11-04T19:30+05:30",
   "attempts": 0,
   "ai_note": "",
-  "prepared": "2026-11-03T10:08+05:30"
+  "prepared": "2026-11-03T10:08+05:30",
+  "ig_media_id": "17914106613510075",
+  "published": "2026-11-04T23:41+05:30"
 }
