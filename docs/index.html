@@ -250,7 +250,8 @@ async function rulesBox(){
   }catch(e){box.innerHTML=`<div class="card muted">${esc(e.message)}</div>`}
 }
 
-show(ready()?"upload":"settings");
+const startTab=(location.hash||"").replace("#","");
+show(ready()?(tabs[startTab]?startTab:"upload"):"settings");
 </script>
 </body>
 </html>

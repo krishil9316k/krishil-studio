@@ -7,6 +7,7 @@ WHATSAPP EMPLOYEE  (reads only rules/whatsapp_rules.json, works only in its own 
 It PREPARES. You send with one tap from the Manager app ("Share to WhatsApp"),
 choosing your Channel / group / broadcast list. No bots, no ban risk, zero cost.
 """
+import os
 import re
 import sys
 import xml.etree.ElementTree as ET
@@ -162,9 +163,54 @@ Return JSON: {{"message": "..."}}"""
     print("DAILY ready", today)
 
 
+# ----------------------------------------------------------------- phone alert
+_repo = os.environ.get("GITHUB_REPOSITORY", "")  # "owner/name", always set inside GitHub Actions
+APP_URL = (os.environ.get("APP_URL", "").strip() or
+           (f"https://{_repo.split('/')[0].lower()}.github.io/{_repo.split('/')[1]}" if "/" in _repo else "")).rstrip("/")
+NTFY_TOPIC = os.environ.get("NTFY_TOPIC", "").strip()
+
+
+def notify(rules):
+    """Buzz the owner's phone (free ntfy app) when a message is ready to send.
+    Tap the alert -> WhatsApp opens with the text typed -> pick group -> Send."""
+    cfg = rules.get("phone_alert", {})
+    if not cfg.get("enabled", True) or not NTFY_TOPIC or not APP_URL:
+        print("phone alert off (NTFY_TOPIC / APP_URL not set)")
+        return
+    t = now()
+    start_h, start_m = map(int, rules["daily_update"]["ready_by_ist"].split(":"))
+    start = t.replace(hour=start_h, minute=start_m, second=0, microsecond=0) - timedelta(minutes=45)
+    end_h, end_m = map(int, cfg.get("quiet_after_ist", "21:30").split(":"))
+    if not (start <= t <= t.replace(hour=end_h, minute=end_m, second=0, microsecond=0)):
+        return  # no alerts at night
+    today = t.date().isoformat()
+    for f, item in ready_items():
+        if item["status"] != "ready" or item["send_on"] > today or item.get("notified"):
+            continue
+        if item.get("media"):
+            title, url, label = "📷 New photo post ready for WhatsApp", f"{APP_URL}/#whatsapp", "Open & share"
+        else:
+            title = "🌅 Morning update ready" if item.get("type") == "daily" else "💬 WhatsApp message ready"
+            url, label = f"{APP_URL}/send.html?id={item['id']}", "Send on WhatsApp"
+        preview = re.sub(r"https?://\S+", "", item["message"]).replace("*", "")
+        preview = re.sub(r"\n{2,}", "\n", preview).strip()[:280]
+        try:
+            r = requests.post("https://ntfy.sh/", timeout=30, json={
+                "topic": NTFY_TOPIC, "title": title, "message": preview + "\n\nTap to send →",
+                "click": url, "priority": 4, "tags": ["krishil"],
+                "actions": [{"action": "view", "label": label, "url": url, "clear": True}]})
+            r.raise_for_status()
+            item["notified"] = t.isoformat(timespec="minutes")
+            lane.write_json(f, item)
+            print("ALERT sent", item["id"])
+        except Exception as e:
+            print("alert failed (will retry next run):", e)
+
+
 def run(rules):
     prepare(rules)
     daily(rules)
+    notify(rules)
     lane.write_json("status/whatsapp.json", {"last_run": now().isoformat(timespec="minutes"),
                                              "ready_today": sum(1 for _, t in ready_items()
                                                                 if t["status"] == "ready" and t["send_on"] <= now().date().isoformat())})
