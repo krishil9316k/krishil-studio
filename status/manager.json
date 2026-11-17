@@ -1,23 +1,6 @@
 {
-  "last_run": "2026-11-17T09:49+05:30",
-  "routed": [
-    {
-      "id": "202611170947510",
-      "to": [
-        "instagram",
-        "whatsapp"
-      ],
-      "category": "stationery_product"
-    },
-    {
-      "id": "202611170947561",
-      "to": [
-        "instagram",
-        "whatsapp"
-      ],
-      "category": "stationery_product"
-    }
-  ],
+  "last_run": "2026-11-17T14:38+05:30",
+  "routed": [],
   "held": [],
   "errors": [],
   "ai": "connected"
