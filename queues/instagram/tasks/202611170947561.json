@@ -20,9 +20,11 @@
     "#junagadh",
     "#StationeryLove"
   ],
-  "status": "scheduled",
+  "status": "published",
   "slot": "2026-11-18T14:56+05:30",
   "attempts": 0,
   "ai_note": "",
-  "prepared": "2026-11-17T09:50+05:30"
+  "prepared": "2026-11-17T09:50+05:30",
+  "ig_media_id": "18131691181876581",
+  "published": "2026-11-18T15:58+05:30"
 }
